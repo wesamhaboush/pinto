@@ -1,0 +1,22 @@
+	-----
+	How To Release
+	-----
+
+Steps
+
+ * Checkout Code
+
+ * Go to the root where the pom.xml is
+
+ * run the following (stop when you get failures and debug):
+
++--------------------------
+mvn clean
+mvn release:clean
+mvn release:prepare
+mvn release:perform
+mvn release:clean
+mvn clean
++--------------------------
+
+ * All sorts of output will be given to you here, you make up your mind about that.

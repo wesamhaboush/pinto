@@ -4,10 +4,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import static com.codebreeze.testing.Randoms.randomInt;
@@ -20,43 +17,39 @@ public class GetterAndSetterTesterTest {
 
     @Test
     public void testRunWithGoodBean() throws Exception {
-        final Supplier<GoodBean> goodBeanFactory = () -> new GoodBean();
-
-        new GetterAndSetterTester<>(goodBeanFactory).run();
+        GetterAndSetterTester
+                .forClass(GoodBean.class)
+                .verify();
     }
 
     @Test(expected = AssertionError.class)
     public void testRunWithBadBean() throws Exception {
-        final Supplier<BadBean> badBeanFactory = () -> new BadBean();
-
-        new GetterAndSetterTester<>(badBeanFactory).run();
+        GetterAndSetterTester
+                .forClass(BadBean.class)
+                .verify();
     }
 
     @Test
     public void testRunWithNoSettersBean() throws Exception {
-        final Supplier<NoSettersBean> noSettersBeanFactory = () -> new NoSettersBean();
-
-        new GetterAndSetterTester<>(noSettersBeanFactory).run();
+        GetterAndSetterTester
+                .forClass(NoSettersBean.class)
+                .verify();
     }
 
     @Test
     public void testRunWithNoGettersBean() throws Exception {
-        final Supplier<NoGettersBean> noGettersBeanFactory = () -> new NoGettersBean();
-
-        new GetterAndSetterTester<>(noGettersBeanFactory).run();
+        GetterAndSetterTester
+                .forClass(NoGettersBean.class)
+                .verify();
     }
 
     @Test
     public void testRunWithComplexObjectsBean() throws Exception {
-        final Supplier<ComplexObjectsBean> complexObjectsBeanFactory = () -> new ComplexObjectsBean();
         final Supplier<int[]> intArrayFactory = () -> new int[]{randomInt()};
-        Map<Class<?>, Supplier<?>> nonStandardFactories = new HashMap<Class<?>, Supplier<?>>() {
-            {
-                put(int[].class, intArrayFactory);
-            }
-        };
-        new GetterAndSetterTester<>(complexObjectsBeanFactory,
-                Collections.<String>emptyList(), nonStandardFactories).run();
+        GetterAndSetterTester
+                .forClass(ComplexObjectsBean.class)
+                .withComplexTypeSupplier(int[].class, intArrayFactory)
+                .verify();
     }
 
     //utils

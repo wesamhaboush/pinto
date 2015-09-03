@@ -6,22 +6,22 @@ public class ToStringTesterTest {
 
     @Test(expected=RuntimeException.class)
     public void testRunAllTestsWithNonConformingNull() {
-        new ToStringTester<>(new NonConformingWithNull()).runAllTests();
+        ToStringTester.forInstances(new NonConformingWithNull()).verify();
     }
 
     @Test(expected=RuntimeException.class)
     public void testRunAllTestsWithNonConformingDefault() {
-        new ToStringTester<>(new NonConformingWithDefault()).runAllTests();
+        ToStringTester.forInstances(new NonConformingWithDefault()).verify();
     }
 
     @Test(expected=RuntimeException.class)
     public void testRunAllTestsWithNonConformingEmpty() {
-        new ToStringTester<>(new NonConformingWithEmpty()).runAllTests();
+        ToStringTester.forInstances(new NonConformingWithEmpty()).verify();
     }
 
     @Test
     public void testRunAllTestsWithConforming() {
-        new ToStringTester<>(new Conforming()).runAllTests();
+        ToStringTester.forInstances(new Conforming()).verify();
     }
 
     //utils

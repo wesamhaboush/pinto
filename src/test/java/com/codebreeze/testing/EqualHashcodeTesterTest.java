@@ -1,19 +1,16 @@
 package com.codebreeze.testing;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import static com.codebreeze.testing.Randoms.randomInt;
-import static com.google.common.collect.Maps.immutableEntry;
 
-public class EqualsHashcodeTesterTest {
+public class EqualHashcodeTesterTest {
 
     @Test(expected=AssertionError.class)
     public void testRunAllTestsWhenDoesntWork() {
@@ -26,7 +23,9 @@ public class EqualsHashcodeTesterTest {
             }
 
         };
-        new EqualsHashcodeTester<>(nonConformingFactory, NonConforming.class).runAllTests();
+        EqualAndHashcodeTester
+                .forClass(NonConforming.class, nonConformingFactory)
+                .verify();
     }
 
     @Test
@@ -40,13 +39,17 @@ public class EqualsHashcodeTesterTest {
             }
 
         };
-        new EqualsHashcodeTester<>(conformingFactory, Conforming.class).runAllTests();
+        EqualAndHashcodeTester
+                .forClass(Conforming.class, conformingFactory)
+                .verify();
     }
 
     @Test
     public void testRunAllTestsWorksWithEnums() {
         final Supplier<ClassWithEnumsAndNonFinal> classWithEnumsFactory = () -> new ClassWithEnumsAndNonFinal(Dummy.values()[0], new ArrayList<>());
-        new EqualsHashcodeTester<>(classWithEnumsFactory, ClassWithEnumsAndNonFinal.class).runAllTests();
+        EqualAndHashcodeTester
+                .forClass(ClassWithEnumsAndNonFinal.class, classWithEnumsFactory)
+                .verify();
     }
 
     @Test(expected=RuntimeException.class)
@@ -59,18 +62,16 @@ public class EqualsHashcodeTesterTest {
             }
 
         };
-        new EqualsHashcodeTester<>(classWithFinalFactory, ClassWithFinal.class).runAllTests();
+        EqualAndHashcodeTester
+                .forClass(ClassWithFinal.class, classWithFinalFactory)
+                .verify();
     }
 
     @Test
     public void testRunAllTestsWorksWithFinalClassesThatHasSuppliedFactories() {
 
-        Class<?> aClass = FinalClass.class;
-        Supplier<?> factory = () -> new FinalClass();
-        Map<Class<?>, Supplier<?>> nonStandardTypFactories =
-                ImmutableMap.<Class<?>, Supplier<?>>builder()
-                        .put(immutableEntry(aClass, factory))
-                .build();
+        final Class<FinalClass> aClass = FinalClass.class;
+        final Supplier<FinalClass> factory = () -> new FinalClass();
 
         final Supplier<ClassWithFinal> classWithFinalFactory = new Supplier<ClassWithFinal>(){
             private final FinalClass fc = new FinalClass();
@@ -79,7 +80,10 @@ public class EqualsHashcodeTesterTest {
                 return new ClassWithFinal(fc);
             }
         };
-        new EqualsHashcodeTester<>(classWithFinalFactory, ClassWithFinal.class, nonStandardTypFactories).runAllTests();
+        EqualAndHashcodeTester
+                .forClass(ClassWithFinal.class, classWithFinalFactory)
+                .withComplexTypeSupplier(aClass, factory)
+                .verify();
     }
 
     //utils

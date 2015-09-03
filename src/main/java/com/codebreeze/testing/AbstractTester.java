@@ -159,21 +159,21 @@ public class AbstractTester {
         }
     };
     public static final Supplier<String[]> STRING_ARRAY_FACTORY = () -> randomArray(String[].class, STRING_FACTORY, randomInt(1, 100));
-    private final Map<Class<?>, Supplier<?>> factoriesForNonStandardTypes = new HashMap<>();
+    private final Map<Class<?>, Supplier<?>> suppliersForNonStandardTypes = new HashMap<>();
 
 
     enum ClassType {
         ENUM, STANDARD, NON_FINAL, OTHER
     }
 
-    private final static Map<Class<?>, Supplier<?>> FACTORIES_FOR_STANDARD_TYPES = createStandardFactories();
+    private final static Map<Class<?>, Supplier<?>> SUPPLIERS_FOR_STANDARD_TYPES = createStandardFactories();
 
     protected Supplier<?> getFactoryForClass(final Class<?> type) {
         Supplier<?> result;
         final ClassType classType = getClassType(type);
         switch (classType) {
             case STANDARD:
-                result = FACTORIES_FOR_STANDARD_TYPES.get(type);
+                result = SUPPLIERS_FOR_STANDARD_TYPES.get(type);
                 break;
             case ENUM:
                 result = factoryForEnum(type);
@@ -183,14 +183,14 @@ public class AbstractTester {
                 break;
             case OTHER:
             default:
-                result = factoriesForNonStandardTypes.get(type);
+                result = suppliersForNonStandardTypes.get(type);
                 Validate.isTrue(!isNull(result), "otherFactories does not contain a factory for type " + type);
         }
         return result;
     }
 
     private ClassType getClassType(final Class<?> type) {
-        if (FACTORIES_FOR_STANDARD_TYPES.containsKey(type)) {
+        if (SUPPLIERS_FOR_STANDARD_TYPES.containsKey(type)) {
             return ClassType.STANDARD;
         }
         if (type.isEnum()) {
@@ -271,15 +271,15 @@ public class AbstractTester {
         };
     }
 
-    protected void addFactories(Map<Class<?>, Supplier<?>> extraFactories) {
-        this.factoriesForNonStandardTypes.putAll(extraFactories);
+    protected void addSuppliers(Map<Class<?>, Supplier<?>> extraFactories) {
+        this.suppliersForNonStandardTypes.putAll(extraFactories);
     }
 
     protected Map<Class<?>, Supplier<?>> getFactoriesForStandardTypes() {
-        return Collections.unmodifiableMap(FACTORIES_FOR_STANDARD_TYPES);
+        return Collections.unmodifiableMap(SUPPLIERS_FOR_STANDARD_TYPES);
     }
 
-    protected Map<Class<?>, Supplier<?>> getFactoriesForNonStandardTypes() {
-        return Collections.unmodifiableMap(factoriesForNonStandardTypes);
+    protected Map<Class<?>, Supplier<?>> getSuppliersForNonStandardTypes() {
+        return Collections.unmodifiableMap(suppliersForNonStandardTypes);
     }
 }

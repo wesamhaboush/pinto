@@ -16,11 +16,5 @@ public class CyclicIndex {
 
     public int next(){
         return index = (index + 1) % arrayLength;
-//        if(index + 1 == arrayLength){
-//            index = 0;
-//        } else {
-//            index++;
-//        }
-//        return index;
     }
 }

@@ -19,6 +19,7 @@ public class GetterAndSetterTesterTest {
     public void testRunWithGoodBean() throws Exception {
         GetterAndSetterTester
                 .forClass(GoodBean.class)
+                .withSupplier(GoodBean::new)
                 .verify();
     }
 
@@ -26,6 +27,7 @@ public class GetterAndSetterTesterTest {
     public void testRunWithBadBean() throws Exception {
         GetterAndSetterTester
                 .forClass(BadBean.class)
+                .withSupplier(BadBean::new)
                 .verify();
     }
 
@@ -33,6 +35,7 @@ public class GetterAndSetterTesterTest {
     public void testRunWithNoSettersBean() throws Exception {
         GetterAndSetterTester
                 .forClass(NoSettersBean.class)
+                .withSupplier(NoSettersBean::new)
                 .verify();
     }
 
@@ -40,6 +43,7 @@ public class GetterAndSetterTesterTest {
     public void testRunWithNoGettersBean() throws Exception {
         GetterAndSetterTester
                 .forClass(NoGettersBean.class)
+                .withSupplier(NoGettersBean::new)
                 .verify();
     }
 
@@ -48,6 +52,7 @@ public class GetterAndSetterTesterTest {
         final Supplier<int[]> intArrayFactory = () -> new int[]{randomInt()};
         GetterAndSetterTester
                 .forClass(ComplexObjectsBean.class)
+                .withSupplier(ComplexObjectsBean::new)
                 .withComplexTypeSupplier(int[].class, intArrayFactory)
                 .verify();
     }

@@ -198,7 +198,7 @@ public class GetterAndSetterTester<T> extends AbstractTester {
         return new Builder<T>().forClass(clazz, () -> {
             try {
                 return clazz.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException  e) {
                 throw Throwables.propagate(e);
             }
         });

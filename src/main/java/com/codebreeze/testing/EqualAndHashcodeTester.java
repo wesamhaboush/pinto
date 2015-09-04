@@ -146,6 +146,8 @@ public class EqualAndHashcodeTester<T> extends AbstractTester {
                     targetFields.add(field);
                 }
             }
+        } else {
+            targetFields.addAll(Arrays.asList(fields));
         }
         return targetFields;
     }

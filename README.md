@@ -16,14 +16,14 @@ The library is also inspired by the realization of the importance of having easy
          
              @Test
              public void testRunAllTestsWorks() {
-                 EqualAndHashcodeTester
+                 EqualAndHashcodeTest
                      .forClass(Bean.class)
                      .verify();
              }
              
              @Test
              public void testRunAllTestsWorks() {
-                 EqualAndHashcodeTester
+                 EqualAndHashcodeTest
                      .forClass(Bean.class, () -> new Bean(System.timeInMillis())
                      .verify();
              }

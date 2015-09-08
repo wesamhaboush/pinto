@@ -10,14 +10,21 @@ import java.util.function.Supplier;
 import static com.codebreeze.testing.Randoms.randomInt;
 
 
-public class GetterAndSetterTesterTest {
+public class GetterAndSetterTestTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void testRunWithGoodBean() throws Exception {
-        GetterAndSetterTester
+        GetterAndSetterTest
+                .forClass(GoodBean.class)
+                .verify();
+    }
+
+    @Test
+    public void testRunWithGoodBeanWithSupplier() throws Exception {
+        GetterAndSetterTest
                 .forClass(GoodBean.class)
                 .withSupplier(GoodBean::new)
                 .verify();
@@ -25,7 +32,7 @@ public class GetterAndSetterTesterTest {
 
     @Test(expected = AssertionError.class)
     public void testRunWithBadBean() throws Exception {
-        GetterAndSetterTester
+        GetterAndSetterTest
                 .forClass(BadBean.class)
                 .withSupplier(BadBean::new)
                 .verify();
@@ -33,7 +40,7 @@ public class GetterAndSetterTesterTest {
 
     @Test
     public void testRunWithNoSettersBean() throws Exception {
-        GetterAndSetterTester
+        GetterAndSetterTest
                 .forClass(NoSettersBean.class)
                 .withSupplier(NoSettersBean::new)
                 .verify();
@@ -41,7 +48,7 @@ public class GetterAndSetterTesterTest {
 
     @Test
     public void testRunWithNoGettersBean() throws Exception {
-        GetterAndSetterTester
+        GetterAndSetterTest
                 .forClass(NoGettersBean.class)
                 .withSupplier(NoGettersBean::new)
                 .verify();
@@ -50,7 +57,7 @@ public class GetterAndSetterTesterTest {
     @Test
     public void testRunWithComplexObjectsBean() throws Exception {
         final Supplier<int[]> intArrayFactory = () -> new int[]{randomInt()};
-        GetterAndSetterTester
+        GetterAndSetterTest
                 .forClass(ComplexObjectsBean.class)
                 .withSupplier(ComplexObjectsBean::new)
                 .withComplexTypeSupplier(int[].class, intArrayFactory)

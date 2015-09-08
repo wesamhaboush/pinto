@@ -1,6 +1,5 @@
 package com.codebreeze.testing;
 
-import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.Validate;
@@ -15,9 +14,7 @@ import static com.codebreeze.testing.Randoms.randomInt;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
-public class EqualAndHashcodeTester<T> extends AbstractTester {
-
-    private final static Predicate<Field> NON_STATIC_FIELDS_FILTER = field -> !Modifier.isStatic(field.getModifiers());
+public class EqualAndHashcodeTest<T> extends AbstractTester {
 
     private final Set<String> excludeFieldNames = new HashSet<>();
     private final Set<String> includeFieldNames = new HashSet<>();
@@ -33,7 +30,7 @@ public class EqualAndHashcodeTester<T> extends AbstractTester {
      * @param includeFieldNames whitelist of fields to consider
      * @param nonStandardTypeSuppliers these need to be able to produce different instance and unequal instances of the target type
      */
-    private EqualAndHashcodeTester(
+    private EqualAndHashcodeTest(
             final Supplier<T> cutSupplier,
             final Class<T> cutClass,
             final Set<String> includeFieldNames,
@@ -133,7 +130,7 @@ public class EqualAndHashcodeTester<T> extends AbstractTester {
         final List<Field> targetFields = new ArrayList<>();
         final Field[] fields = Stream.of(clazz.getDeclaredFields())
                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
-                .toArray(size -> new Field[size]);
+                .toArray(Field[]::new);
         if (!includeFieldNames.isEmpty()) {
             for (final Field field : fields) {
                 if (includeFieldNames.contains(field.getName())) {
@@ -268,7 +265,7 @@ public class EqualAndHashcodeTester<T> extends AbstractTester {
 
         public void verify(){
             validateIncludeExcludeListsAreUsedExclusively();
-            new EqualAndHashcodeTester<T>(cutSupplier, clazz, includeFieldNames, excludeFieldNames, nonStandardTypeSuppliers).verify();
+            new EqualAndHashcodeTest<T>(cutSupplier, clazz, includeFieldNames, excludeFieldNames, nonStandardTypeSuppliers).verify();
         }
 
         private void validateIncludeExcludeListsAreUsedExclusively() {

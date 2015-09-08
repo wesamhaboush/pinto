@@ -23,7 +23,7 @@ public class EqualHashcodeTesterTest {
             }
 
         };
-        EqualAndHashcodeTester
+        EqualAndHashcodeTest
                 .forClass(NonConforming.class, nonConformingFactory)
                 .verify();
     }
@@ -39,7 +39,7 @@ public class EqualHashcodeTesterTest {
             }
 
         };
-        EqualAndHashcodeTester
+        EqualAndHashcodeTest
                 .forClass(Conforming.class, conformingFactory)
                 .verify();
     }
@@ -47,7 +47,7 @@ public class EqualHashcodeTesterTest {
     @Test
     public void testRunAllTestsWorksWithEnums() {
         final Supplier<ClassWithEnumsAndNonFinal> classWithEnumsFactory = () -> new ClassWithEnumsAndNonFinal(Dummy.values()[0], new ArrayList<>());
-        EqualAndHashcodeTester
+        EqualAndHashcodeTest
                 .forClass(ClassWithEnumsAndNonFinal.class, classWithEnumsFactory)
                 .verify();
     }
@@ -62,7 +62,7 @@ public class EqualHashcodeTesterTest {
             }
 
         };
-        EqualAndHashcodeTester
+        EqualAndHashcodeTest
                 .forClass(ClassWithFinal.class, classWithFinalFactory)
                 .verify();
     }
@@ -80,7 +80,7 @@ public class EqualHashcodeTesterTest {
                 return new ClassWithFinal(fc);
             }
         };
-        EqualAndHashcodeTester
+        EqualAndHashcodeTest
                 .forClass(ClassWithFinal.class, classWithFinalFactory)
                 .withComplexTypeSupplier(aClass, factory)
                 .verify();

@@ -2,10 +2,7 @@ package com.codebreeze.testing;
 
 import com.google.common.base.Throwables;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -14,7 +11,7 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class GetterAndSetterTester<T> extends AbstractTester {
+public class GetterAndSetterTest<T> extends AbstractTester {
 
     private final Class<T> clazz;
     private final Supplier<T> cutSupplier;
@@ -23,12 +20,12 @@ public class GetterAndSetterTester<T> extends AbstractTester {
     private final boolean strict;
 
 
-    public GetterAndSetterTester(final Class<T> clazz,
-                                 final Supplier<T> cutSupplier,
-                                 final Set<String> includeFields,
-                                 final Set<String> excludeFields,
-                                 final Map<Class<?>, Supplier<?>> nonStandardSuppliers,
-                                 final boolean strict) {
+    private GetterAndSetterTest(final Class<T> clazz,
+                                final Supplier<T> cutSupplier,
+                                final Set<String> includeFields,
+                                final Set<String> excludeFields,
+                                final Map<Class<?>, Supplier<?>> nonStandardSuppliers,
+                                final boolean strict) {
         this.clazz = clazz;
         this.cutSupplier = cutSupplier;
         this.includeFields.addAll(includeFields);
@@ -197,8 +194,13 @@ public class GetterAndSetterTester<T> extends AbstractTester {
     public static <T> Builder<T> forClass(final Class<T> clazz){
         return new Builder<T>().forClass(clazz, () -> {
             try {
-                return clazz.newInstance();
-            } catch (InstantiationException | IllegalAccessException  e) {
+                final Constructor<?> constructor = Stream.of(clazz.getDeclaredConstructors())
+                        .filter(c -> c.getParameterCount() == 0)
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("cannot instantiate class without a no-args constructor, you can provide your own supplier if you want"));
+                    constructor.setAccessible(true);
+                    return (T)constructor.newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 throw Throwables.propagate(e);
             }
         });
@@ -258,7 +260,7 @@ public class GetterAndSetterTester<T> extends AbstractTester {
 
         public void verify() {
             validateIncludeExcludeListsAreUsedExclusively();
-            new GetterAndSetterTester<T>(clazz, cutSupplier, includeFieldNames, excludeFieldNames, nonStandardTypeSuppliers, strict).verify();
+            new GetterAndSetterTest<T>(clazz, cutSupplier, includeFieldNames, excludeFieldNames, nonStandardTypeSuppliers, strict).verify();
         }
 
         private void validateIncludeExcludeListsAreUsedExclusively() {

@@ -148,12 +148,7 @@ public class Randoms {
 
     public static <T extends Enum<T>> Supplier<T> randomEnumFactory(final Class<T> enumClass) {
         Validate.notNull(enumClass, "enumClass cannot be null");
-        return new Supplier<T>() {
-            @Override
-            public T get() {
-                return randomFrom(enumClass);
-            }
-        };
+        return () -> randomFrom(enumClass);
     }
 
     /**

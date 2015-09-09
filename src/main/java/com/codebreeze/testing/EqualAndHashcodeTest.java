@@ -4,7 +4,9 @@ import com.google.common.base.Throwables;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.Validate;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Supplier;
@@ -175,7 +177,7 @@ public class EqualAndHashcodeTest<T> extends AbstractTester {
             testTargetFieldsInfluenceEquality();
             testTargetFieldsInfluenceHashCode();
         } catch (final IllegalAccessException ex) {
-            throw new EqualAndHashCodeTestException(ex);
+            throw Throwables.propagate(ex);
         }
     }
 
@@ -198,19 +200,16 @@ public class EqualAndHashcodeTest<T> extends AbstractTester {
     }
 
 
-    @SuppressWarnings("serial")
-    private static class EqualAndHashCodeTestException extends RuntimeException {
-
-        public EqualAndHashCodeTestException(final Throwable throwable) {
-            super(throwable);
-        }
-    }
-
     public static <T> Builder<T> forClass(final Class<T> clazz){
         return new Builder<T>().forClass(clazz, () -> {
             try {
-                return clazz.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
+                final Constructor<?> constructor = Stream.of(clazz.getDeclaredConstructors())
+                        .filter(c -> c.getParameterCount() == 0)
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("cannot instantiate class without a no-args constructor, you can provide your own supplier if you want"));
+                constructor.setAccessible(true);
+                return (T)constructor.newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 throw Throwables.propagate(e);
             }
         });

@@ -120,7 +120,8 @@ public class GetterAndSetterTest<T> extends AbstractTester {
         try {
             return getGetter(field) != null;
         } catch (RuntimeException rte) {
-            if (rte.getCause().getClass() == NoSuchMethodException.class) {
+            if (rte.getCause() != null &&
+                    rte.getCause().getClass() == NoSuchMethodException.class) {
                 return false;
             } else {
                 throw rte;

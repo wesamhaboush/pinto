@@ -1,134 +1,166 @@
 package com.codebreeze.testing;
 
-import com.google.common.base.Throwables;
-import org.apache.commons.lang3.Validate;
-
 import java.util.*;
 import java.util.function.Supplier;
 
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-
-public class ToStringTester<T> {
+public class ToStringTester<T>
+{
 
     private final Class<T> clazz;
     private final Supplier<T> supplier;
-    private final Set<T> ts = new HashSet<T>();
+    private final Set<T> ts = new HashSet<>();
 
-    private ToStringTester(final Class<T> clazz, Supplier<T> cutSupplier, Set<T> ts) {
+    private ToStringTester(
+            final Class<T> clazz, final Supplier<T> cutSupplier, final Set<T> ts
+                          )
+    {
         this.clazz = clazz;
         this.supplier = cutSupplier;
-        if (!isEmpty(ts)) {
-            this.ts.addAll(ts);
-        }
+        this.ts.addAll(PintoObjects.firstNonNull(ts, Collections.emptySet()));
     }
 
-    private void testNotNull() {
-        for (T t : ts) {
-            Validate.notNull(t.toString(), "t.toString()");
+    private void testNotNull()
+    throws IllegalAccessException, InstantiationException
+    {
+        for (T t : ts)
+        {
+            Objects.requireNonNull(t.toString(), "t.toString()");
         }
-        if(supplier != null){
+        if (supplier != null)
+        {
             final T t = supplier.get();
-            Validate.notNull(t.toString(), "t.toString()");
+            Objects.requireNonNull(t.toString(), "t.toString()");
         }
-        if(clazz != null){
-            try {
-                final T t = clazz.newInstance();
-                Validate.notNull(t.toString(), "t.toString()");
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw Throwables.propagate(e);
-            }
+        if (clazz != null)
+        {
+            final T t = clazz.newInstance();
+            Objects.requireNonNull(t.toString(), "t.toString()");
         }
     }
 
-    private void testNotDefault() {
-        for (T t : ts) {
-            Validate.isTrue(!t.toString().equalsIgnoreCase(
-                    t.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(t))
-            ), "default toString used", "value was " + t.toString());
+    private void testNotDefault()
+    throws IllegalAccessException, InstantiationException
+    {
+        for (T t : ts)
+        {
+            checkDefaultToStringUsed(t);
         }
-        if(supplier != null){
+        if (supplier != null)
+        {
             final T t = supplier.get();
-            Validate.isTrue(!t.toString().equalsIgnoreCase(
-                    t.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(t))
-            ), "default toString used", "value was " + t.toString());
+            checkDefaultToStringUsed(t);
         }
-        if(clazz != null){
-            try {
-                final T t = clazz.newInstance();
-                Validate.isTrue(!t.toString().equalsIgnoreCase(
-                        t.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(t))
-                ), "default toString used", "value was " + t.toString());
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw Throwables.propagate(e);
-            }
+        if (clazz != null)
+        {
+            final T t = clazz.newInstance();
+            checkDefaultToStringUsed(t);
         }
     }
 
-    private void testNotEmpty() {
-        for (T t : ts) {
-            Validate.isTrue(!t.toString().trim().isEmpty(), "t.toString().trim().isEmpty()", "should be false");
+    private void checkDefaultToStringUsed(T t)
+    {
+        if (t.toString()
+             .equalsIgnoreCase(t.getClass()
+                                .getName() + "@" + Integer.toHexString(System.identityHashCode(t))))
+        {
+            throw new IllegalArgumentException("default toString used, value was " + t.toString());
         }
-        if(supplier != null){
+    }
+
+    private void testNotEmpty()
+    throws IllegalAccessException, InstantiationException
+    {
+        for (T t : ts)
+        {
+            checkEmptyToString(t);
+        }
+        if (supplier != null)
+        {
             final T t = supplier.get();
-            Validate.isTrue(!t.toString().trim().isEmpty(), "t.toString().trim().isEmpty()", "should be false");
+            checkEmptyToString(t);
         }
-        if(clazz != null){
-            try {
-                final T t = clazz.newInstance();
-                Validate.isTrue(!t.toString().trim().isEmpty(), "t.toString().trim().isEmpty()", "should be false");
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw Throwables.propagate(e);
-            }
+        if (clazz != null)
+        {
+            final T t = clazz.newInstance();
+            checkEmptyToString(t);
         }
     }
 
-    public void verify() {
-        testNotNull();
-        testNotDefault();
-        testNotEmpty();
+    private void checkEmptyToString(T t)
+    {
+        if (t.toString()
+             .trim()
+             .isEmpty())
+        {
+            throw new IllegalArgumentException("t.toString().trim().isEmpty() should be false");
+        }
     }
 
-    public static <T> Builder<T> forClass(final Class<T> clazz){
+    public void verify()
+    {
+        try
+        {
+            testNotNull();
+            testNotDefault();
+            testNotEmpty();
+        }
+        catch (final InstantiationException | IllegalAccessException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> Builder<T> forClass(final Class<T> clazz)
+    {
         return new Builder<T>().forClass(clazz);
     }
 
-    public static <T> Builder<T> forSupplier(final Supplier<T> cutSupplier){
+    public static <T> Builder<T> forSupplier(final Supplier<T> cutSupplier)
+    {
         return new Builder<T>().forSupplier(cutSupplier);
     }
 
-    public static <T> Builder<T> forInstances(final T... ts){
+    public static <T> Builder<T> forInstances(final T... ts)
+    {
         return new Builder<T>().forInstances(ts);
     }
 
-    public static class Builder<T> {
+    public static class Builder<T>
+    {
         private Class<T> clazz;
         private Supplier<T> cutSupplier;
         private Set<T> instances = new HashSet<>();
 
-        private Builder() {
+        private Builder()
+        {
         }
 
-        public Builder<T> forClass(final Class<T> clazz) {
+        public Builder<T> forClass(final Class<T> clazz)
+        {
             this.clazz = clazz;
             return this;
         }
 
-        public Builder<T> forSupplier(final Supplier<T> cutSupplier) {
+        public Builder<T> forSupplier(final Supplier<T> cutSupplier)
+        {
             this.cutSupplier = cutSupplier;
             return this;
         }
 
-        public Builder<T> withSupplier(final Supplier<T> cutSupplier) {
+        public Builder<T> withSupplier(final Supplier<T> cutSupplier)
+        {
             this.cutSupplier = cutSupplier;
             return this;
         }
 
-        public Builder<T> forInstances(T...ts) {
+        public Builder<T> forInstances(T... ts)
+        {
             instances.addAll(Arrays.asList(ts));
             return this;
         }
 
-        public void verify() {
+        public void verify()
+        {
             new ToStringTester<T>(clazz, cutSupplier, instances).verify();
         }
     }

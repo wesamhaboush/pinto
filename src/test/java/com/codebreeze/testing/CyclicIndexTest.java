@@ -2,16 +2,25 @@ package com.codebreeze.testing;
 
 import org.junit.Test;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static org.apache.commons.lang3.RandomUtils.nextInt;
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.Assert.assertEquals;
 
 public class CyclicIndexTest {
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testConstructorWillRejectZeroOrLessArrays() {
-        final int invalidLength = nextInt(-10, 0);
-        new CyclicIndex(invalidLength);
+        final int invalidLength = -1;
+        assertThat(catchThrowable(() -> new CyclicIndex(invalidLength)))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testConstructorWillRejectZero() {
+        final int invalidLength = 0;
+        assertThat(catchThrowable(() -> new CyclicIndex(invalidLength)))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -23,8 +32,8 @@ public class CyclicIndexTest {
         final CyclicIndex cai = new CyclicIndex(length);
 
         //then
-        assertEquals(newArrayList(0, 0, 0),
-                newArrayList(
+        assertEquals(asList(0, 0, 0),
+                asList(
                 cai.next(),
                 cai.next(),
                 cai.next()));
@@ -39,8 +48,8 @@ public class CyclicIndexTest {
         final CyclicIndex cai = new CyclicIndex(length);
 
         //then
-        assertEquals(newArrayList(0, 1, 0, 1, 0, 1),
-                newArrayList(
+        assertEquals(asList(0, 1, 0, 1, 0, 1),
+                asList(
                 cai.next(),
                 cai.next(),
                 cai.next(),
@@ -58,8 +67,8 @@ public class CyclicIndexTest {
         final CyclicIndex cai = new CyclicIndex(length);
 
         //then
-        assertEquals(newArrayList(0, 1, 2, 0, 1, 2, 0, 1, 2),
-                newArrayList(
+        assertEquals(asList(0, 1, 2, 0, 1, 2, 0, 1, 2),
+                asList(
                 cai.next(),
                 cai.next(),
                 cai.next(),

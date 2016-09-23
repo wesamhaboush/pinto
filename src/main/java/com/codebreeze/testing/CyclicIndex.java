@@ -1,14 +1,15 @@
 package com.codebreeze.testing;
 
-import org.apache.commons.lang3.Validate;
-
 public class CyclicIndex {
     private final int arrayLength;
 
     private volatile int index;
 
     public CyclicIndex(final int arrayLength){
-        Validate.isTrue(arrayLength > 0, "cannot index an array of 0 or less length");
+        if(arrayLength <= 0)
+        {
+            throw new IllegalArgumentException("cannot index an array of 0 or less length");
+        }
 
         this.arrayLength = arrayLength;
         this.index = -1;

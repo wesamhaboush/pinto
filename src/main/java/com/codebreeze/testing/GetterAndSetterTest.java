@@ -1,7 +1,5 @@
 package com.codebreeze.testing;
 
-import com.google.common.base.Throwables;
-
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Supplier;
@@ -15,7 +13,12 @@ public class GetterAndSetterTest<T> extends AbstractTester {
 
     private final Class<T> clazz;
     private final Supplier<T> cutSupplier;
-    private final Set<String> excludeFields = new HashSet<>();
+    private final Set<String> excludeFields = new HashSet<String>()
+    {
+        {
+            add("$jacocoData");
+        }
+    };
     private final Set<String> includeFields = new HashSet<>();
     private final boolean strict;
 
@@ -83,7 +86,7 @@ public class GetterAndSetterTest<T> extends AbstractTester {
         try {
             run();
         } catch (InvocationTargetException | IllegalAccessException e) {
-            throw Throwables.propagate(e);
+            throw PintoThrowables.propagate(e);
         }
     }
 
@@ -202,7 +205,7 @@ public class GetterAndSetterTest<T> extends AbstractTester {
                     constructor.setAccessible(true);
                     return (T)constructor.newInstance();
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                throw Throwables.propagate(e);
+                throw PintoThrowables.propagate(e);
             }
         });
     }

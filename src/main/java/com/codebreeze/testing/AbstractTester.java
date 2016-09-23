@@ -1,19 +1,15 @@
 package com.codebreeze.testing;
 
 
-import org.apache.commons.lang3.RandomUtils;
-import org.apache.commons.lang3.Validate;
-
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
+import static com.codebreeze.testing.PintoArrays.toPrimitive;
 import static com.codebreeze.testing.Randoms.*;
-import static java.util.Objects.isNull;
-import static org.apache.commons.lang3.ArrayUtils.toPrimitive;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.mockito.Mockito.mock;
 
 public class AbstractTester {
@@ -22,7 +18,7 @@ public class AbstractTester {
 
         @Override
         public Integer get() {
-            int newValue = RandomUtils.nextInt(0, Integer.MAX_VALUE);
+            int newValue = Randoms.nextInt(0, Integer.MAX_VALUE);
             if (newValue == previous) {
                 newValue = get();
             }
@@ -184,7 +180,7 @@ public class AbstractTester {
             case OTHER:
             default:
                 result = suppliersForNonStandardTypes.get(type);
-                Validate.isTrue(!isNull(result), "otherFactories does not contain a factory for type " + type);
+                Objects.requireNonNull(result, "otherFactories does not contain a factory for type " + type);
         }
         return result;
     }
@@ -194,8 +190,13 @@ public class AbstractTester {
             return ClassType.STANDARD;
         }
         if (type.isEnum()) {
-            Validate.isTrue(type.getEnumConstants().length > 0, "enumConstants count is greater than 0 must be true. " +
-                    "cannot use this field for equality or hashcoding, since the enum has no values, only null can be assigned to it. Exclude it please");
+            if(type.getEnumConstants().length == 0)
+            {
+                throw new IllegalArgumentException("enumConstants count is greater than 0 must be true. "
+                                                   + "cannot use this field for equality or hashcoding, since "
+                                                   + "the enum has no values, only null can be assigned to it. "
+                                                   + "Exclude it please");
+            }
             return ClassType.ENUM;
         }
         if (!Modifier.isFinal(type.getModifiers())) {

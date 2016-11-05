@@ -1,16 +1,22 @@
 package com.codebreeze.testing;
 
+import java.util.Arrays;
+
 public class PintoArrays
 {
-    public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
-    public static final char[] EMPTY_CHAR_ARRAY = new char[0];
-    public static final boolean[] EMPTY_BOOLEAN_ARRAY = new boolean[0];
-    public static final float[] EMPTY_FLOAT_ARRAY = new float[0];
-    public static final Float[] EMPTY_FLOAT_OBJECT_ARRAY = new Float[0];
-    public static final double[] EMPTY_DOUBLE_ARRAY = new double[0];
-    public static final long[] EMPTY_LONG_ARRAY = new long[0];
-    public static final short[] EMPTY_SHORT_ARRAY = new short[0];
-    public static final int[] EMPTY_INT_ARRAY = new int[0];
+    private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
+    private static final char[] EMPTY_CHAR_ARRAY = new char[0];
+    private static final boolean[] EMPTY_BOOLEAN_ARRAY = new boolean[0];
+    private static final float[] EMPTY_FLOAT_ARRAY = new float[0];
+    private static final double[] EMPTY_DOUBLE_ARRAY = new double[0];
+    private static final long[] EMPTY_LONG_ARRAY = new long[0];
+    private static final short[] EMPTY_SHORT_ARRAY = new short[0];
+    private static final int[] EMPTY_INT_ARRAY = new int[0];
+
+    private PintoArrays()
+    {
+        throw new UnsupportedOperationException("uninstantiable class: " + PintoArrays.class.getSimpleName());
+    }
 
     public static int[] toPrimitive(final Integer[] array) {
         if (array == null) {
@@ -18,11 +24,7 @@ public class PintoArrays
         } else if (array.length == 0) {
             return EMPTY_INT_ARRAY;
         }
-        final int[] result = new int[array.length];
-        for (int i = 0; i < array.length; i++) {
-            result[i] = array[i].intValue();
-        }
-        return result;
+        return Arrays.stream(array).mapToInt(i -> i).toArray();
     }
 
     public static short[] toPrimitive(final Short[] array) {
@@ -37,30 +39,25 @@ public class PintoArrays
         }
         return result;
     }
+
     public static long[] toPrimitive(final Long[] array) {
         if (array == null) {
             return null;
         } else if (array.length == 0) {
             return EMPTY_LONG_ARRAY;
         }
-        final long[] result = new long[array.length];
-        for (int i = 0; i < array.length; i++) {
-            result[i] = array[i].longValue();
-        }
-        return result;
+        return Arrays.stream(array).mapToLong(i -> i).toArray();
     }
+
     public static double[] toPrimitive(final Double[] array) {
         if (array == null) {
             return null;
         } else if (array.length == 0) {
             return EMPTY_DOUBLE_ARRAY;
         }
-        final double[] result = new double[array.length];
-        for (int i = 0; i < array.length; i++) {
-            result[i] = array[i].doubleValue();
-        }
-        return result;
+        return Arrays.stream(array).mapToDouble(i -> i).toArray();
     }
+
     public static float[] toPrimitive(final Float[] array) {
         if (array == null) {
             return null;

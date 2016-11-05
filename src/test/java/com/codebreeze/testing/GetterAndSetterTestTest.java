@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static com.codebreeze.testing.Randoms.randomInt;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 
 public class GetterAndSetterTestTest {
@@ -20,6 +22,125 @@ public class GetterAndSetterTestTest {
         GetterAndSetterTest
                 .forClass(GoodBean.class)
                 .verify();
+
+        GetterAndSetterTest
+                .forClass(GoodBean.class, () -> new GoodBean())
+                .verify();
+    }
+
+    @Test
+    public void excluded_fields_should_be_excluded() throws Exception {
+        final class TestBean {
+            public String getEx1()
+            {
+                return ex2; //this is wrong, but we do not care cz we are excluding it
+            }
+
+            public String getEx2()
+            {
+                return ex2;
+            }
+
+            final String ex1;
+            final String ex2;
+
+            TestBean(final String ex1, final String ex2)
+            {
+                this.ex1 = ex1;
+                this.ex2 = ex2;
+            }
+        }
+        GetterAndSetterTest
+                .forClass(TestBean.class)
+                .withSupplier(() -> new TestBean("a", "b"))
+                .excludeFields("ex1")
+                .verify();
+    }
+
+    @Test
+    public void included_fields_should_be_included_and_nothing_else() throws Exception {
+        final class TestBean {
+            public String getEx1()
+            {
+                return ex2; //this is wrong, but we do not care cz we are excluding it
+            }
+
+            public String getEx2()
+            {
+                return ex2;
+            }
+
+            public boolean isEx3() { return ex3; }
+
+            final String ex1;
+            final String ex2;
+            final boolean ex3;
+
+            TestBean(final String ex1, final String ex2, final boolean ex3)
+            {
+                this.ex1 = ex1;
+                this.ex2 = ex2;
+                this.ex3 = ex3;
+            }
+        }
+        GetterAndSetterTest
+                .forClass(TestBean.class)
+                .withSupplier(() -> new TestBean("a", "b", true))
+                .includeFields("ex2", "ex3")
+                .verify();
+    }
+
+    @Test
+    public void should_reject_beans_with_missing_setters_in_strict_mode() throws Exception {
+        final class TestBean {
+            public String getEx1()
+            {
+                return ex1;
+            }
+
+            final String ex1;
+
+            TestBean(final String ex1)
+            {
+                this.ex1 = ex1;
+            }
+        }
+        //when
+        final Throwable throwable = catchThrowable(() -> GetterAndSetterTest.forClass(TestBean.class)
+                                                                            .withSupplier(() -> new TestBean("a"))
+                                                                            .strict(true)
+                                                                            .verify());
+
+        //then
+        assertThat(throwable).isInstanceOf(AssertionError.class)
+                .hasMessageContaining("and field [ex1] did not");
+    }
+
+    @Test
+    public void should_reject_using_include_and_exclude_at_the_same_time() throws Exception {
+        final class TestBean {
+            public String getEx1()
+            {
+                return ex1;
+            }
+
+            final String ex1;
+
+            TestBean(final String ex1)
+            {
+                this.ex1 = ex1;
+            }
+        }
+        //when
+        final Throwable throwable = catchThrowable(() -> GetterAndSetterTest.forClass(TestBean.class)
+                                                                            .withSupplier(() -> new TestBean("a"))
+                                                                            .includeFields("ex1")
+                                                                            .excludeFields("ex1")
+                                                                            .verify());
+
+        //then
+        assertThat(throwable).isInstanceOf(IllegalStateException.class)
+                             .hasMessageContaining("cannot have both include and exclude fields non-empty");
     }
 
     @Test
@@ -54,6 +175,35 @@ public class GetterAndSetterTestTest {
                 .verify();
     }
 
+    @Test(expected=NullPointerException.class)
+    public void should_throw_npe_when_missing_factory_for_complex_final_class() throws Exception {
+        final class FinalClass
+        {
+        }
+        class Bean
+        {
+            private FinalClass finalClassField;
+            public Bean(){}
+            public FinalClass getFinalClassField()
+            {
+                return finalClassField;
+            }
+        }
+        GetterAndSetterTest
+                .forClass(Bean.class, () -> new Bean())
+                .verify();
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void should_throw_illegal_argument_when_missing_no_args_constructor() throws Exception {
+        class Bean
+        {
+        }
+        GetterAndSetterTest
+                .forClass(Bean.class)
+                .verify();
+    }
+
     @Test
     public void testRunWithComplexObjectsBean() throws Exception {
         final Supplier<int[]> intArrayFactory = () -> new int[]{randomInt()};
@@ -68,6 +218,28 @@ public class GetterAndSetterTestTest {
     private static class GoodBean {
         private int a;
         private long b;
+        private Short c;
+        private Short[] d;
+        private short[] e;
+        private Long[] f;
+        private long[] g;
+        private Double h;
+        private double[] i;
+        private Double[] j;
+        private Float k;
+        private float[] l;
+        private Float[] m;
+        private boolean[] n;
+        private Boolean[] o;
+        private char[] p;
+        private Character[] q;
+        private Character r;
+        private Byte s;
+        private String t;
+
+        private GoodBean()
+        {
+        }
 
         public long getB() {
             return b;
@@ -83,6 +255,186 @@ public class GetterAndSetterTestTest {
 
         public void setA(int a) {
             this.a = a;
+        }
+
+        public Short getC()
+        {
+            return c;
+        }
+
+        public void setC(final Short c)
+        {
+            this.c = c;
+        }
+
+        public Short[] getD()
+        {
+            return d;
+        }
+
+        public void setD(final Short[] d)
+        {
+            this.d = d;
+        }
+
+        public short[] getE()
+        {
+            return e;
+        }
+
+        public void setE(final short[] e)
+        {
+            this.e = e;
+        }
+
+        public Long[] getF()
+        {
+            return f;
+        }
+
+        public void setF(final Long[] f)
+        {
+            this.f = f;
+        }
+
+        public long[] getG()
+        {
+            return g;
+        }
+
+        public void setG(final long[] g)
+        {
+            this.g = g;
+        }
+
+        public Double getH()
+        {
+            return h;
+        }
+
+        public void setH(final Double h)
+        {
+            this.h = h;
+        }
+
+        public double[] getI()
+        {
+            return i;
+        }
+
+        public void setI(final double[] i)
+        {
+            this.i = i;
+        }
+
+        public Double[] getJ()
+        {
+            return j;
+        }
+
+        public void setJ(final Double[] j)
+        {
+            this.j = j;
+        }
+
+        public Float getK()
+        {
+            return k;
+        }
+
+        public void setK(final Float k)
+        {
+            this.k = k;
+        }
+
+        public float[] getL()
+        {
+            return l;
+        }
+
+        public void setL(final float[] l)
+        {
+            this.l = l;
+        }
+
+        public Float[] getM()
+        {
+            return m;
+        }
+
+        public void setM(final Float[] m)
+        {
+            this.m = m;
+        }
+
+        public boolean[] getN()
+        {
+            return n;
+        }
+
+        public void setN(final boolean[] n)
+        {
+            this.n = n;
+        }
+
+        public Boolean[] getO()
+        {
+            return o;
+        }
+
+        public void setO(final Boolean[] o)
+        {
+            this.o = o;
+        }
+
+        public Character[] getQ()
+        {
+            return q;
+        }
+
+        public void setQ(final Character[] q)
+        {
+            this.q = q;
+        }
+
+        public char[] getP()
+        {
+            return p;
+        }
+
+        public void setP(final char[] p)
+        {
+            this.p = p;
+        }
+
+        public Character getR()
+        {
+            return r;
+        }
+
+        public void setR(final Character r)
+        {
+            this.r = r;
+        }
+
+        public Byte getS()
+        {
+            return s;
+        }
+
+        public void setS(final Byte s)
+        {
+            this.s = s;
+        }
+
+        public String getT()
+        {
+            return t;
+        }
+
+        public void setT(final String t)
+        {
+            this.t = t;
         }
     }
 

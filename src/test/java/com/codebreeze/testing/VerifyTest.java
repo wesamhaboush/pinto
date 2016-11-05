@@ -49,6 +49,29 @@ public class VerifyTest
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
+    @Test
+    public void useful_should_pass_good_enums()
+    throws Exception
+    {
+        Verify.useful(A.class);
+    }
+
+    @Test
+    public void throws_null_pointer_exception_if_null_class_is_given()
+    throws Exception
+    {
+        assertThat(catchThrowable(() -> Verify.useful(null)))
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    public void throws_null_pointer_exception_if_no_members_enum_is_provided()
+    throws Exception
+    {
+        assertThat(catchThrowable(() -> Verify.useful(C.class)))
+                .isInstanceOf(AssertionError.class);
+    }
+
     private static class Instantiable {}
     private static class Uninstantiable {
         private Uninstantiable()
@@ -64,4 +87,7 @@ public class VerifyTest
             this.something = something;
         }
     }
+
+    enum A {B}
+    enum C {}
 }

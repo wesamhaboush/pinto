@@ -1,15 +1,26 @@
 package com.codebreeze.testing;
 
 import java.util.*;
+import java.util.function.IntPredicate;
+import java.util.function.IntUnaryOperator;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 import static com.codebreeze.testing.PintoObjects.firstNonNull;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
-public class PintoCollections
+class PintoCollections
 {
-    public static <T> HashSet<T> hashSet(final T... ts)
+
+    private PintoCollections()
+    {
+        throw new UnsupportedOperationException("uninstantiable class: " + this.getClass().getSimpleName());
+    }
+
+    @SafeVarargs
+    static <T> HashSet<T> hashSet(final T... ts)
     {
         return new HashSet<T>()
         {{
@@ -17,12 +28,12 @@ public class PintoCollections
         }};
     }
 
-    public static <T> boolean isEmpty(final Collection<T> collection)
+    static <T> boolean isEmpty(final Collection<T> collection)
     {
         return firstNonNull(collection, Collections.emptyList()).isEmpty();
     }
 
-    public static <E> Set<Set<E>> powerSet(final Set<E> set)
+    static <E> Set<Set<E>> powerSet(final Set<E> set)
     {
         return Collections.unmodifiableSet(new PowerSet<>(requireNonNull(set)));
     }
@@ -32,14 +43,14 @@ public class PintoCollections
     {
         final Map<E, Integer> inputSet;
 
-        PowerSet(Set<E> input)
+        PowerSet(final Set<E> input)
         {
-            this.inputSet = PintoCollections.indexMap(input);
-            if (inputSet.size() > 30)
+            if (input.size() > 30)
             {
                 throw new IllegalArgumentException(
-                        String.format("Too many elements to create power set: %s > 30", inputSet.size()));
+                        String.format("Too many elements to create power set: %s > 30", input.size()));
             }
+            this.inputSet = PintoCollections.indexMap(input);
         }
 
         @Override
@@ -57,12 +68,12 @@ public class PintoCollections
         @Override
         public Iterator<Set<E>> iterator()
         {
-            return new AbstractIndexedListIterator<Set<E>>(size())
+            return new AbstractIndexedIterator<Set<E>>(size())
             {
                 @Override
                 protected Set<E> get(final int setBits)
                 {
-                    return new SubSet<E>(inputSet, setBits);
+                    return new SubSet<>(inputSet, setBits);
                 }
             };
         }
@@ -82,11 +93,6 @@ public class PintoCollections
         @Override
         public boolean equals(Object obj)
         {
-            if (obj instanceof PowerSet)
-            {
-                PowerSet<?> that = (PowerSet<?>) obj;
-                return inputSet.equals(that.inputSet);
-            }
             return super.equals(obj);
         }
 
@@ -103,22 +109,21 @@ public class PintoCollections
         }
     }
 
-    private abstract static class AbstractIndexedListIterator<E>
-            implements ListIterator<E>
+    private abstract static class AbstractIndexedIterator<E>
+            implements Iterator<E>
     {
         private final int size;
         private int position;
 
         protected abstract E get(int index);
 
-        protected AbstractIndexedListIterator(int size)
+        AbstractIndexedIterator(int size)
         {
             this(size, 0);
         }
 
-        protected AbstractIndexedListIterator(int size, int position)
+        AbstractIndexedIterator(int size, int position)
         {
-            checkPositionIndex(position, size, "index");
             this.size = size;
             this.position = position;
         }
@@ -137,51 +142,6 @@ public class PintoCollections
                 throw new NoSuchElementException();
             }
             return get(position++);
-        }
-
-        @Override
-        public final int nextIndex()
-        {
-            return position;
-        }
-
-        @Override
-        public final boolean hasPrevious()
-        {
-            return position > 0;
-        }
-
-        @Override
-        public final E previous()
-        {
-            if (!hasPrevious())
-            {
-                throw new NoSuchElementException();
-            }
-            return get(--position);
-        }
-
-        @Override
-        public final int previousIndex()
-        {
-            return position - 1;
-        }
-
-        @Override
-        public final void add(E e)
-        {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public final void set(E e)
-        {
-            throw new UnsupportedOperationException();
-        }
-
-        public void remove()
-        {
-            throw new UnsupportedOperationException("remove() is not supported");
         }
     }
 
@@ -241,33 +201,7 @@ public class PintoCollections
         }
     }
 
-    public static int checkPositionIndex(int index, int size, String desc)
-    {
-        // Carefully optimized for execution by hotspot (explanatory comment above)
-        if (index < 0 || index > size)
-        {
-            throw new IndexOutOfBoundsException(badPositionIndex(index, size, desc));
-        }
-        return index;
-    }
-
-    private static String badPositionIndex(int index, int size, String desc)
-    {
-        if (index < 0)
-        {
-            return String.format("%s (%s) must not be negative", desc, index);
-        }
-        else if (size < 0)
-        {
-            throw new IllegalArgumentException("negative size: " + size);
-        }
-        else
-        { // index > size
-            return String.format("%s (%s) must not be greater than size (%s)", desc, index, size);
-        }
-    }
-
-    public static <E> Map<E, Integer> indexMap(Collection<E> list)
+    private static <E> Map<E, Integer> indexMap(Collection<E> list)
     {
         final Map<E, Integer> map = new HashMap<>(list.size());
         int i = 0;
@@ -276,5 +210,28 @@ public class PintoCollections
             map.put(e, i++);
         }
         return Collections.unmodifiableMap(map);
+    }
+
+    public static IntStream takeWhile(final int seed, final IntUnaryOperator f, IntPredicate p) {
+        // change here
+        Objects.requireNonNull(f);
+        final PrimitiveIterator.OfInt iterator = new PrimitiveIterator.OfInt() {
+            int t = seed;
+
+            @Override
+            public boolean hasNext() {
+                return p.test(t); // change here
+            }
+
+            @Override
+            public int nextInt() {
+                int v = t;
+                t = f.applyAsInt(t);
+                return v;
+            }
+        };
+        return StreamSupport.intStream(Spliterators.spliteratorUnknownSize(
+                iterator,
+                Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL), false);
     }
 }

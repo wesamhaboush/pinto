@@ -20,4 +20,9 @@ public class PintoObjects
         }
         return t;
     }
+
+    public static <T> boolean isNotEqual(final T t1, final T t2)
+    {
+        return t1 != t2;
+    }
 }

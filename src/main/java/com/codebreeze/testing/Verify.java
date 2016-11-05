@@ -1,15 +1,16 @@
 package com.codebreeze.testing;
 
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
-import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class Verify
 {
@@ -32,7 +33,6 @@ public class Verify
                                                        .filter(c -> c.getParameterCount() == 0)
                                                        .findFirst()
                                                        .orElseThrow(() -> new IllegalArgumentException("cannot find 0 argument constructor for class: " + tClass));
-        System.out.println(tClass.getDeclaredConstructors().length);
         noArgsConstructor.setAccessible(true);
 
         //when
@@ -57,6 +57,19 @@ public class Verify
         assertThat(throwable, anyOf(instanceOf(InvocationTargetException.class),
                                     instanceOf(UnsupportedOperationException.class)));
         assertThat(throwable.getCause(), anyOf(instanceOf(UnsupportedOperationException.class), nullValue()));
+    }
+
+    public static <T extends Enum<T>> void useful(Class<T> enumClass)
+    {
+        if(enumClass == null)
+        {
+            throw new NullPointerException("cannot test with a null enum");
+        }
+        assertTrue("enums must have some members to be useful, this one has none", enumClass.getEnumConstants().length > 0);
+        assertEquals(Arrays.stream(enumClass.getEnumConstants())
+                           .map(item -> item.name())
+                           .map(s -> T.valueOf(enumClass, s))
+                           .toArray().length, enumClass.getEnumConstants().length);
     }
 
     private static <T> Throwable catchThrowable(final Callable<T> c)

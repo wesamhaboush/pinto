@@ -43,4 +43,12 @@ public class PintoObjectsTest
     {
         assertThat(PintoObjects.checkNotNull("abc")).isEqualTo("abc");
     }
+
+    @Test
+    public void isNotEqual_should_return_correct_outcomes()
+    throws Exception
+    {
+        assertThat(PintoObjects.isNotEqual("abc", "abc")).isFalse();
+        assertThat(PintoObjects.isNotEqual("abc", "abd")).isTrue();
+    }
 }

@@ -219,7 +219,7 @@ public class EqualAndHashcodeTestTest
         //given
         class SomeBean {
             private String name;
-        //    private int age;
+            private int age;
 
             public SomeBean(final String name)
             {
